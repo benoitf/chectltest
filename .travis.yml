@@ -9,20 +9,11 @@ addons:
     - p7zip
 before_install:
 - npm install -g pkg@4.3.8
-before_deploy:
-- git config --local user.name "Mario Loriedo"
-- git config --local user.email "mario.loriedo@gmail.com"
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
-- export SHORT_SHA1=$(git rev-parse --short HEAD)
-- git tag $TRAVIS_TAG
-- sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"\1-${SHORT_SHA1}\",#g" package.json
-- yarn pack
-- mkdir ${TRAVIS_BUILD_DIR}/packages
-- npx oclif-dev pack -t darwin-x64
 deploy:
   provider: releases
   api-key: $GITHUB_AUTH_TOKEN
   file_glob: true
+  name: $CHECTL_VERSION
   file:
   - "dist/chectl-v*/chectl-*.gz"
   - "${TRAVIS_BUILD_DIR}/packages/chectl-*"
@@ -32,12 +23,25 @@ deploy:
     tags: false
 jobs:
   include:
-  - stage: "Releases from master: next channel"
+  - stage: "Configuration for releases from master branch: next channel"
     if: branch = master
     script: skip
     before_deploy:
     - echo "this is before_deploy in case of master branch"
-  - stage: "Releases from 'release' branch: stable channel"
+    - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
+    - export SHORT_SHA1=$(git rev-parse --short HEAD)
+    - export CHECTL_VERSION=${SHORT_SHA1}
+  - stage: "Configuration for releases from 'release' branch: stable channel"
     if: branch = release
     before_deploy:
     - echo "this is before_deploy in case of release branch"
+  - stage: "Build artifacts"
+    before_deploy:
+    - echo "this is before_deploy for building artifacts"
+    - git config --local user.name "Mario Loriedo"
+    - git config --local user.email "mario.loriedo@gmail.com"
+    - git tag $TRAVIS_TAG
+    - sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"\1-${CHECTL_VERSION}\",#g" package.json
+    - yarn pack
+    - mkdir ${TRAVIS_BUILD_DIR}/packages
+    - npx oclif-dev pack -t darwin-x64
