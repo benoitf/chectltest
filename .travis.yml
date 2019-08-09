@@ -22,10 +22,8 @@ before_deploy:
 - |
   if [ "$TRAVIS_BRANCH" = release ]; then
     echo "Branch is release branch..."
-    export CHECTL_RELEASE_VERSION=$(cat VERSION)
-    export TRAVIS_TAG=${TRAVIS_TAG:-$CHECTL_RELEASE_VERSION}
-    SHORT_SHA1=$(git rev-parse --short HEAD)
-    export CHECTL_VERSION=$CHECTL_RELEASE_VERSION.$SHORT_SHA1
+    export CHECTL_VERSION=$(cat VERSION)
+    export TRAVIS_TAG=${TRAVIS_TAG:-$CHECTL_VERSION}
     export GITHUB_RELEASE_NAME=$CHECTL_VERSION
   fi;
 - sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"$CHECTL_VERSION\",#g" package.json
