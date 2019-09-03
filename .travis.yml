@@ -2,30 +2,32 @@ os: osx
 language: node_js
 node_js: '10'
 before_deploy:
-- git config --local user.name "Mario Loriedo"
-- git config --local user.email "mario.loriedo@gmail.com"
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
-- export CHECTL_VERSION="UNKNOWN"
-- export GITHUB_RELEASE_NAME=$TRAVIS_TAG
 - |
-  if [ "$TRAVIS_BRANCH" = master ]; then
-    echo "Branch is master branch..."
-    CURRENT_DAY=$(date +'%Y%m%d')
-    SHORT_SHA1=$(git rev-parse --short HEAD)
-    export CHECTL_VERSION=0.0.$CURRENT_DAY-next.$SHORT_SHA1
-    export GITHUB_RELEASE_NAME=$CHECTL_VERSION
-  fi;
-- |
-  if [ "$TRAVIS_BRANCH" = release ]; then
-    echo "Branch is release branch..."
-    export CHECTL_VERSION=$(cat VERSION)
-    export TRAVIS_TAG=${TRAVIS_TAG:-$CHECTL_VERSION}
-    export GITHUB_RELEASE_NAME=$CHECTL_VERSION
-  fi;
-- sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"$CHECTL_VERSION\",#g" package.json
-- git tag $TRAVIS_TAG
-- mkdir gh-pages
-- echo $(date +%s) > gh-pages/update
+  if ! [ "$BEFORE_DEPLOY_DONE" ]; then
+    export BEFORE_DEPLOY_DONE=1
+    git config --local user.name "Mario Loriedo"
+    git config --local user.email "mario.loriedo@gmail.com"
+    export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
+    export CHECTL_VERSION="UNKNOWN"
+    export GITHUB_RELEASE_NAME=$TRAVIS_TAG
+    if [ "$TRAVIS_BRANCH" = master ]; then
+      echo "Branch is master branch..."
+      CURRENT_DAY=$(date +'%Y%m%d')
+      SHORT_SHA1=$(git rev-parse --short HEAD)
+      export CHECTL_VERSION=0.0.$CURRENT_DAY-next.$SHORT_SHA1
+      export GITHUB_RELEASE_NAME=$CHECTL_VERSION
+    fi;
+    if [ "$TRAVIS_BRANCH" = release ]; then
+      echo "Branch is release branch..."
+      export CHECTL_VERSION=$(cat VERSION)
+      export TRAVIS_TAG=${TRAVIS_TAG:-$CHECTL_VERSION}
+      export GITHUB_RELEASE_NAME=$CHECTL_VERSION
+    fi;
+    sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"$CHECTL_VERSION\",#g" package.json
+    git tag $TRAVIS_TAG
+    mkdir gh-pages
+    echo $(date +%s) > gh-pages/update
+  fi
 deploy:
   - provider: releases
     api-key: $GITHUB_AUTH_TOKEN
