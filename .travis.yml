@@ -1,11 +1,7 @@
 os: osx
 language: node_js
-node_js:
-- lts/*
-cache: yarn
+node_js: '10'
 before_deploy:
-- brew update
-- brew install p7zip  
 - git config --local user.name "Mario Loriedo"
 - git config --local user.email "mario.loriedo@gmail.com"
 - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
