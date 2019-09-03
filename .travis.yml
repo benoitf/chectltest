@@ -27,6 +27,7 @@ before_deploy:
     git tag $TRAVIS_TAG
     mkdir gh-pages
     echo $(date +%s) > gh-pages/update
+    env
   fi
 deploy:
   - provider: releases
@@ -42,7 +43,7 @@ deploy:
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|release)$
   - provider: pages
-    api-key: $GITHUB_AUTH_TOKEN
+    github-token: $GITHUB_AUTH_TOKEN
     skip_cleanup: true
     keep_history: true
     local-dir: gh-pages
