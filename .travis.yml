@@ -1,10 +1,13 @@
 os: osx
 language: node_js
 node_js: '10'
+cache: yarn
 before_deploy:
 - |
   if ! [ "$BEFORE_DEPLOY_DONE" ]; then
     export BEFORE_DEPLOY_DONE=1
+    brew update
+    brew install p7zip
     git config --local user.name "Mario Loriedo"
     git config --local user.email "mario.loriedo@gmail.com"
     export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
@@ -14,8 +17,8 @@ before_deploy:
       echo "Branch is master branch..."
       CURRENT_DAY=$(date +'%Y%m%d')
       SHORT_SHA1=$(git rev-parse --short HEAD)
-      export CHECTL_VERSION=0.0.$CURRENT_DAY-next.$SHORT_SHA1
-      export GITHUB_RELEASE_NAME=$CHECTL_VERSION
+      export CHECTL_VERSION=0.0.$CURRENT_DAY-next
+      export GITHUB_RELEASE_NAME=0.0.$CURRENT_DAY-next.$SHORT_SHA1
     fi;
     if [ "$TRAVIS_BRANCH" = release ]; then
       echo "Branch is release branch..."
@@ -25,6 +28,7 @@ before_deploy:
     fi;
     sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"$CHECTL_VERSION\",#g" package.json
     git tag $TRAVIS_TAG
+    npx oclif-dev pack
     mkdir gh-pages
     echo $(date +%s) > gh-pages/update
     env
