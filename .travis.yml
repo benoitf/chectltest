@@ -48,3 +48,4 @@ deploy:
       repo: benoitf/chectltest
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|release)$
+      
