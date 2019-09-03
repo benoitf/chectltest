@@ -11,8 +11,6 @@ before_deploy:
 - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')}
 - export CHECTL_VERSION="UNKNOWN"
 - export GITHUB_RELEASE_NAME=$TRAVIS_TAG
-- mkdir gh-pages
-- echo $(date +%s) > gh-pages/update
 - |
   if [ "$TRAVIS_BRANCH" = master ]; then
     echo "Branch is master branch..."
@@ -30,7 +28,8 @@ before_deploy:
   fi;
 - sed -i sed "s#version\":\ \"\(.*\)\",#version\":\ \"$CHECTL_VERSION\",#g" package.json
 - git tag $TRAVIS_TAG
-- npx oclif-dev pack
+- mkdir gh-pages
+- echo $(date +%s) > gh-pages/update
 deploy:
   - provider: releases
     api-key: $GITHUB_AUTH_TOKEN
@@ -51,6 +50,5 @@ deploy:
     local-dir: gh-pages
     on:
       repo: benoitf/chectltest
-      tags: false
       all_branches: true
       condition: $TRAVIS_BRANCH =~ ^(master|release)$
